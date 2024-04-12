@@ -1,37 +1,32 @@
-def recur(start):
-    global cnt
-    #print(res)
-    if res and not cal(res) :
-        if len(res) - 1 > cnt:
-            cnt = len(res)-1
-        #print(cnt)
+import sys
+input = sys.stdin.read
+
+def is_not_carry(sum_val, target):
+    while sum_val > 0 or target > 0:
+        num1 = sum_val % 10
+        num2 = target % 10
+        if num1 + num2 >= 10:
+            return False
+        sum_val //= 10
+        target //= 10
+    return True
+
+def backtracking(count, depth, sum_val):
+    global result
+    result = max(result, count)
+
+    if depth == n:
         return
 
-    for i in range(start,N):
-        res.append(num[i])
-        #print('app',i,' ',res)
-        recur(i+1)
-        res.pop()
-        #print('pop',i,' ',res)
+    for i in range(depth, n):
+        if is_not_carry(sum_val, arr[i]):
+            backtracking(count + 1, i + 1, sum_val + arr[i])
 
-def cal(res):
-    prev_num = str(sum(res[:-1]))[::-1]
-    next_num = str(res[-1])[::-1]
-    min_len = min(len(prev_num), len(next_num))
-    for i in range(min_len):
-        if int(prev_num[i]) + int(next_num[i]) >= 10:
-            return False
-    return True
-            
-        
-    
+if __name__ == "__main__":
+    data = input().split()
+    n = int(data[0])
+    arr = list(map(int, data[1:n+1]))
 
-N = int(input())
-num = []
-res = []
-cnt = 0
-for _ in range(N):
-    num.append(int(input()))
-#cal(res)
-recur(0)
-print(cnt)
+    result = 0
+    backtracking(0, 0, 0)
+    print(result)
