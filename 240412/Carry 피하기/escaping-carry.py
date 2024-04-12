@@ -19,7 +19,7 @@ def cal(res):
     next_num = str(res[-1])[::-1]
     min_len = min(len(prev_num), len(next_num))
     for i in range(min_len):
-        if int(prev_num[i]) + int(next_num[i]) > 10:
+        if int(prev_num[i]) + int(next_num[i]) >= 10:
             return False
     return True
             
