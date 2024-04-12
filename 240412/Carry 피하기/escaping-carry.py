@@ -15,12 +15,11 @@ def recur(start):
         #print('pop',i,' ',res)
 
 def cal(res):
-    prev_num = str(sum(res[:-1]))
-    next_num = str(res[-1])
+    prev_num = str(sum(res[:-1]))[::-1]
+    next_num = str(res[-1])[::-1]
     min_len = min(len(prev_num), len(next_num))
-    for i in range(min_len-1, -1 , -1):
+    for i in range(min_len):
         if int(prev_num[i]) + int(next_num[i]) > 10:
-            #print('s')
             return False
     return True
             
