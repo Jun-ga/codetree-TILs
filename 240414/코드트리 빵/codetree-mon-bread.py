@@ -95,7 +95,7 @@ def simulate():
     # step1. 격자에 있는 사람들은 편의점 방향으로 향해 1칸씩 움직임 (격자에 있다는건 이미 자기 움직일 수 있는 시간이 지났다는거)
     for i in range(m):
         # 만약에 사람이 격자내에 없거나, 이미 편의점에 들어가있으면 안움직임
-        if people[i] == EMPTY and people[i] == stores_graph[i]:
+        if people[i] == EMPTY or people[i] == stores_graph[i]:
             continue
 
         bfs(stores_graph[i])
