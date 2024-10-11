@@ -1,90 +1,129 @@
-def rotate(arr, si, sj):    # 90도 시계방향 회전
-    narr = [x[:] for x in arr]
+from collections import deque
+import copy
+
+def rotate(arr,x,y,n): # 돌리기
+    new = copy.deepcopy(arr)
+    temp_arr = [[0]*3 for _ in range(3)]
+    new_arr = [[0]*3 for _ in range(3)]
+
+    start_x, start_y = x-1,y-1
+
     for i in range(3):
         for j in range(3):
-            narr[si+i][sj+j]=arr[si+3-j-1][sj+i]
-    return narr
+            temp_arr[i][j] = arr[start_x+i][start_y+j]
+    if n == 90:
+        for i in range(3):
+            for j in range(3):
+                new_arr[j][3-1-i] = temp_arr[i][j]
+    elif n == 180:
+        for i in range(3):
+            for j in range(3):
+                new_arr[3-1-i][3-1-j] = temp_arr[i][j]
+    elif n == 270:
+        for i in range(3):
+            for j in range(3):
+                new_arr[3-1-j][i] = temp_arr[i][j]
+    for i in range(3):
+        for j in range(3):
+            new[start_x+i][start_y+j] = new_arr[i][j]
 
-def bfs(arr,v,si,sj,clr):
-    q = []
-    sset = set()
-    cnt = 0
+    return new
 
-    q.append((si,sj))
-    v[si][sj]=1
-    sset.add((si,sj))
-    cnt+=1
 
-    while q:
-        ci,cj = q.pop(0)
-        # 네방향, 범위내, 미방문, 조건: 같은 값이면
-        for di,dj in ((-1,0),(1,0),(0,-1),(0,1)):
-            ni,nj = ci+di, cj+dj
-            if 0<=ni<5 and 0<=nj<5 and v[ni][nj]==0 and arr[ci][cj]==arr[ni][nj]:
-                q.append((ni,nj))
-                v[ni][nj]=1
-                sset.add((ni,nj))
-                cnt+=1
+def bfs_check(MAP,clr):
 
-    if cnt>=3:      # 유물이면: cnt 리턴 + clr==1이면 0으로 clear
-        if clr==1:  # 0으로 초기화
-            for i,j in sset:
-                arr[i][j]=0
-        return cnt
-    else:           # 3개 미만이면 0리턴
+    visit = [[0] * 5 for _ in range(5)]
+    point = 0
+
+    for i in range(5):
+        for j in range(5):
+            if visit[i][j] == 0:
+                term = bfs(i,j, MAP,visit,clr)
+                point += term
+
+
+    return point
+
+def bfs(i,j,MAP,visit, clr):
+    node = []
+    count = 0
+
+
+    bfs_deque = deque()
+    bfs_deque.append((i,j))
+    node.append((i,j))
+    visit[i][j] = 1
+    count +=1
+
+    while bfs_deque:
+        x,y = bfs_deque.popleft()
+
+        for k in range(4):
+            nx = x + dx[k]
+            ny = y + dy[k]
+
+            if 0 <= nx < 5 and 0<= ny < 5 and  MAP[x][y] == MAP[nx][ny] and visit[nx][ny] == 0:
+                count += 1
+                visit[nx][ny] = 1
+                bfs_deque.append((nx, ny))
+                node.append((nx,ny))
+
+    if count >= 3:
+        if clr == 1 :
+            for I, J in node:
+                MAP[I][J] = 0
+        return count
+    else:
         return 0
 
-def count_clear(arr, clr):  # clr==1인 경우 3개이상값들을 0으로 clear
-    v = [[0]*5 for _ in range(5)]
-    cnt = 0
-    for i in range(5):
-        for j in range(5):  # 미방문인 경우 같은 값이면 fill
-            if v[i][j]==0:
-                # 같은 값이면, 3개 이상인 경우
-                t = bfs(arr,v,i,j,clr)
-                cnt+=t
-    return cnt
+
 
 K, M = map(int, input().split())
-arr = [list(map(int, input().split())) for _ in range(5)]
-lst = list(map(int, input().split()))
-ans = []
+MAP = [] # 유물
+for _ in range(5):
+    MAP.append(list(map(int, input().split())))
+item_num = list(map(int, input().split())) #새로 생기는 유물
 
-for _ in range(K):  # K턴을 진행(유물이 없는 경우 즉시종료)
-    #[1] 탐사진행
-    mx_cnt = 0
-    for rot in range(1, 4):     # 회전수->열->행 (작은순)
-        for sj in range(3):
-            for si in range(3):
-                # rot 회수만큼 90도 시계방향 회전 => narr
-                narr = [x[:] for x in arr]
-                for _ in range(rot):
-                    narr = rotate(narr, si, sj)
+dx = [-1,1, 0, 0]
+dy = [0,0,-1,1]
 
-                # 유무개수 카운트
-                t = count_clear(narr, 0)
-                if mx_cnt < t:      # 최대개수
-                    mx_cnt = t
-                    marr = narr
+answer = []
 
-    # 유물이 없는 경우 턴 즉시종료
-    if mx_cnt==0:
+for _ in range(K): #K 만큼 반복할거임 탐사를
+    # [1]
+    max_point = 0
+
+    # 가능한 모든 중점과 각을 확인한 후 가장 좋은 값 나옴
+    for n in (90,180,270):
+        for y in range(1,4):
+            for x in range(1,4):
+                new_MAP = rotate(MAP, x, y, n)
+
+
+                ans = bfs_check(new_MAP,0)
+                if max_point < ans:
+                    max_point = ans
+                    MMAP = new_MAP
+
+
+
+    if max_point == 0: # 할 값이 없는 상황임
         break
 
-    #[2] 연쇄획득
-    cnt = 0
-    arr = marr
+    # [2] 연쇄 획득
+    point = 0
+    MAP = MMAP
     while True:
-        t = count_clear(arr, 1)
-        if t==0:
-            break   # 연쇄획득 종료 => 다음 턴으로..
-        cnt += t    # 획득한 유물 개수 누적
+        count =  bfs_check(MAP, 1)
+        if count == 0:
+            break
+        point += count
 
-        # arr의 0값인 부분 리스트에서 순서대로 추가
         for j in range(5):
             for i in range(4,-1,-1):
-                if arr[i][j]==0:
-                    arr[i][j]=lst.pop(0)
+                if MAP[i][j] == 0:
+                    MAP[i][j] = item_num.pop(0)
 
-    ans.append(cnt) # 이번턴 연쇄획득한 개수 추가
-print(*ans)
+    answer.append(point)
+
+print(*answer)
